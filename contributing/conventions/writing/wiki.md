@@ -102,7 +102,6 @@ Depending on the lab, consider creating wiki files for:
 - `vm.md` — Virtual machines: creation, access, IP addresses.
 - `vm-info.md` — VM base image information and preinstalled programs.
 - `vm-hardening.md` — VM security hardening: firewall, fail2ban, SSH configuration.
-- `vm-autochecker.md` — Autochecker user account setup with SSH key authentication.
 - `operating-system.md` — OS concepts.
 - `computer-networks.md` — Networking basics.
 - `architectural-views.md` — PlantUML component, sequence, and deployment diagrams.
