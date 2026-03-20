@@ -1,5 +1,16 @@
 # `Autochecker` API
 
+<h2>Table of contents</h2>
+
+- [About the `Autochecker` API](#about-the-autochecker-api)
+- [`Autochecker` API credentials](#autochecker-api-credentials)
+  - [`Autochecker` API login](#autochecker-api-login)
+    - [`<autochecker-api-login>` placeholder](#autochecker-api-login-placeholder)
+  - [`Autochecker` API password](#autochecker-api-password)
+    - [`<autochecker-api-password>` placeholder](#autochecker-api-password-placeholder)
+- [`Autochecker` API base URL](#autochecker-api-base-url)
+- [`Autochecker` API endpoints](#autochecker-api-endpoints)
+
 ## About the `Autochecker` API
 
 The `Autochecker` API lets you query the anonymized data collected by the [`Autochecker`](./autochecker.md#what-is-the-autochecker).
