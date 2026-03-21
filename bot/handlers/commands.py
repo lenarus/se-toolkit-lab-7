@@ -111,17 +111,25 @@ def handle_scores(lab: str | None) -> str:
         client = get_api_client()
         data = client.get_pass_rates(lab)
 
-        if not data or "pass_rates" not in data:
+        if not data:
             return f"No pass rates found for {lab}."
 
-        pass_rates = data["pass_rates"]
-        if not pass_rates:
+        # API returns a list of task stats directly
+        if isinstance(data, list):
+            tasks = data
+        elif isinstance(data, dict) and "pass_rates" in data:
+            tasks = data["pass_rates"]
+        else:
+            return f"Unexpected data format for {lab}."
+
+        if not tasks:
             return f"No tasks completed for {lab}."
 
         lines = [f"Pass rates for {lab}:"]
-        for task in pass_rates:
-            task_name = task.get("task_name", "Unknown Task")
-            pass_rate = task.get("pass_rate", 0)
+        for task in tasks:
+            task_name = task.get("task", "Unknown Task")
+            # API returns avg_score, handler expects pass_rate
+            pass_rate = task.get("pass_rate") or task.get("avg_score") or 0
             attempts = task.get("attempts", 0)
             lines.append(f"- {task_name}: {pass_rate:.1f}% ({attempts} attempts)")
 
