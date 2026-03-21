@@ -1,20 +1,27 @@
 #!/usr/bin/env python3
 """
-Telegram bot entry point.
+LMS Bot entry point.
 
 Supports two modes:
-- --test: Run handlers directly without Telegram (for local testing)
-- Default: Run the Telegram bot
+- --test: Run handlers directly (for local testing, no Telegram needed)
+- Default: Connect to Telegram and handle messages (Task 4)
+
+The handlers are pure functions — they work the same way whether called
+from --test mode or from Telegram. This is separation of concerns.
 
 Usage:
-    uv run bot.py --test "/start"   # Test a command
-    uv run bot.py                   # Run the Telegram bot
+    uv run bot.py --test "/start"   # Test a command locally
+    uv run bot.py                   # Run as Telegram bot (Task 4)
 """
 
 import argparse
 import sys
 
+from config import setup_config
 from handlers import commands
+
+# Load configuration from .env.bot.secret
+setup_config()
 
 
 def main() -> None:
