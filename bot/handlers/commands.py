@@ -82,7 +82,8 @@ def handle_labs() -> str:
         lines = ["Available labs:"]
         for lab in labs:
             lab_id = lab.get("id", "unknown")
-            lab_name = lab.get("name", "Unnamed Lab")
+            # API returns 'title' for labs
+            lab_name = lab.get("title") or lab.get("name") or "Unnamed Lab"
             lines.append(f"- {lab_id} — {lab_name}")
 
         return "\n".join(lines)
