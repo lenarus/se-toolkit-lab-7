@@ -11,6 +11,7 @@ from --test mode or from Telegram. This is separation of concerns.
 
 Usage:
     uv run bot.py --test "/start"   # Test a command locally
+    uv run bot.py --test "which lab has the lowest pass rate"  # Test natural language
     uv run bot.py                   # Run as Telegram bot (Task 4)
 """
 
@@ -18,7 +19,7 @@ import argparse
 import sys
 
 from config import setup_config
-from handlers import commands
+from handlers import commands, intent_router, keyboard
 
 # Load configuration from .env.bot.secret
 setup_config()
@@ -32,35 +33,49 @@ def main() -> None:
         help="Run in test mode (execute handlers without Telegram)",
     )
     parser.add_argument(
-        "command",
+        "query",
         nargs="?",
-        help="Command to test (e.g., /start, /help)",
+        help="Command or natural language query to test",
     )
     args = parser.parse_args()
 
     if args.test:
-        if not args.command:
-            print("Error: --test requires a command argument")
-            print("Usage: uv run bot.py --test /start")
+        if not args.query:
+            print("Error: --test requires a query argument")
+            print('Usage: uv run bot.py --test "/start"')
+            print('   or: uv run bot.py --test "which lab has the lowest pass rate"')
             sys.exit(1)
-        run_test(args.command)
+        run_test(args.query)
     else:
         run_bot()
 
 
-def run_test(command: str) -> None:
-    """Execute a handler directly and print the result."""
-    print(f"Testing command: {command}")
-    print("-" * 40)
-    result = commands.handle_command(command)
-    print(result)
+def run_test(query: str) -> None:
+    """
+    Execute a handler directly and print the result.
+
+    If the query starts with /, use command handlers.
+    Otherwise, use the intent router (LLM).
+    """
+    if query.startswith("/"):
+        # Command handler mode
+        print(f"Testing command: {query}")
+        print("-" * 40)
+        result = commands.handle_command(query)
+        print(result)
+    else:
+        # Natural language mode - use intent router
+        print(f"Routing query: {query}")
+        print("-" * 40)
+        result = intent_router.route(query, debug=True)
+        print(result)
 
 
 def run_bot() -> None:
     """Run the Telegram bot."""
     print("Starting Telegram bot...")
-    # TODO: Implement Telegram bot in later task
-    print("Bot not yet implemented - this is Task 1 placeholder")
+    # TODO: Implement Telegram bot in Task 4
+    print("Bot not yet implemented - this is Task 3 placeholder")
 
 
 if __name__ == "__main__":
