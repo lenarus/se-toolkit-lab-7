@@ -1,6 +1,7 @@
 """Command handlers for the LMS Telegram bot."""
 
 from services.api_client import get_api_client, ConnectionError, HTTPError
+from .keyboard import get_start_keyboard, get_help_keyboard
 
 
 def handle_command(command: str) -> str:
@@ -34,7 +35,14 @@ def handle_command(command: str) -> str:
 
 def handle_start() -> str:
     """Handle /start command."""
-    return "Welcome to the LMS Bot! Use /help to see available commands."
+    return (
+        "Welcome to the LMS Bot! 🎓\n\n"
+        "I can help you explore LMS data using natural language. Try asking:\n"
+        '• "which lab has the lowest pass rate?"\n'
+        '• "show me scores for lab 04"\n'
+        '• "who are the top 5 students?"\n\n'
+        "Or use the buttons below to get started!"
+    )
 
 
 def handle_help() -> str:
@@ -45,7 +53,8 @@ def handle_help() -> str:
         "/help - Show this help message\n"
         "/health - Check bot and backend status\n"
         "/labs - List available labs\n"
-        "/scores <lab> - View pass rates for a specific lab (e.g., /scores lab-04)"
+        "/scores <lab> - View pass rates for a specific lab (e.g., /scores lab-04)\n\n"
+        "Or just ask me a question in natural language!"
     )
 
 
