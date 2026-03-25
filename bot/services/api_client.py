@@ -35,9 +35,13 @@ class LMSAPIClient:
             response.raise_for_status()
             return response.json()
         except httpx.ConnectError as e:
-            raise ConnectionError(f"connection refused ({self.base_url}). Check that the services are running.") from e
+            raise ConnectionError(
+                f"connection refused ({self.base_url}). Check that the services are running."
+            ) from e
         except httpx.HTTPStatusError as e:
-            raise HTTPError(f"HTTP {e.response.status_code} {e.response.reason_phrase}. The backend service may be down.") from e
+            raise HTTPError(
+                f"HTTP {e.response.status_code} {e.response.reason_phrase}. The backend service may be down."
+            ) from e
         except httpx.HTTPError as e:
             raise HTTPError(f"request failed: {e}") from e
 
@@ -59,9 +63,13 @@ class LMSAPIClient:
             response.raise_for_status()
             return response.json()
         except httpx.ConnectError as e:
-            raise ConnectionError(f"connection refused ({self.base_url}). Check that the services are running.") from e
+            raise ConnectionError(
+                f"connection refused ({self.base_url}). Check that the services are running."
+            ) from e
         except httpx.HTTPStatusError as e:
-            raise HTTPError(f"HTTP {e.response.status_code} {e.response.reason_phrase}. The backend service may be down.") from e
+            raise HTTPError(
+                f"HTTP {e.response.status_code} {e.response.reason_phrase}. The backend service may be down."
+            ) from e
         except httpx.HTTPError as e:
             raise HTTPError(f"request failed: {e}") from e
 
@@ -79,6 +87,103 @@ class LMSAPIClient:
             return {"healthy": False, "error": "No data returned"}
         except (ConnectionError, HTTPError) as e:
             return {"healthy": False, "error": str(e)}
+
+    def get_learners(self) -> Optional[list[dict[str, Any]]]:
+        """Fetch all enrolled learners."""
+        try:
+            response = self._client.get("/learners/")
+            response.raise_for_status()
+            return response.json()
+        except httpx.ConnectError as e:
+            raise ConnectionError(f"connection refused ({self.base_url})") from e
+        except httpx.HTTPStatusError as e:
+            raise HTTPError(f"HTTP {e.response.status_code}") from e
+        except httpx.HTTPError as e:
+            raise HTTPError(f"request failed: {e}") from e
+
+    def get_scores(self, lab: str) -> Optional[dict[str, Any]]:
+        """Get score distribution for a lab."""
+        try:
+            response = self._client.get("/analytics/scores", params={"lab": lab})
+            response.raise_for_status()
+            return response.json()
+        except httpx.ConnectError as e:
+            raise ConnectionError(f"connection refused ({self.base_url})") from e
+        except httpx.HTTPStatusError as e:
+            raise HTTPError(f"HTTP {e.response.status_code}") from e
+        except httpx.HTTPError as e:
+            raise HTTPError(f"request failed: {e}") from e
+
+    def get_timeline(self, lab: str) -> Optional[list[dict[str, Any]]]:
+        """Get submission timeline for a lab."""
+        try:
+            response = self._client.get("/analytics/timeline", params={"lab": lab})
+            response.raise_for_status()
+            return response.json()
+        except httpx.ConnectError as e:
+            raise ConnectionError(f"connection refused ({self.base_url})") from e
+        except httpx.HTTPStatusError as e:
+            raise HTTPError(f"HTTP {e.response.status_code}") from e
+        except httpx.HTTPError as e:
+            raise HTTPError(f"request failed: {e}") from e
+
+    def get_groups(self, lab: str) -> Optional[list[dict[str, Any]]]:
+        """Get per-group scores for a lab."""
+        try:
+            response = self._client.get("/analytics/groups", params={"lab": lab})
+            response.raise_for_status()
+            return response.json()
+        except httpx.ConnectError as e:
+            raise ConnectionError(f"connection refused ({self.base_url})") from e
+        except httpx.HTTPStatusError as e:
+            raise HTTPError(f"HTTP {e.response.status_code}") from e
+        except httpx.HTTPError as e:
+            raise HTTPError(f"request failed: {e}") from e
+
+    def get_top_learners(
+        self, lab: str, limit: int = 10
+    ) -> Optional[list[dict[str, Any]]]:
+        """Get top learners for a lab."""
+        try:
+            response = self._client.get(
+                "/analytics/top-learners", params={"lab": lab, "limit": limit}
+            )
+            response.raise_for_status()
+            return response.json()
+        except httpx.ConnectError as e:
+            raise ConnectionError(f"connection refused ({self.base_url})") from e
+        except httpx.HTTPStatusError as e:
+            raise HTTPError(f"HTTP {e.response.status_code}") from e
+        except httpx.HTTPError as e:
+            raise HTTPError(f"request failed: {e}") from e
+
+    def get_completion_rate(self, lab: str) -> Optional[dict[str, Any]]:
+        """Get completion rate for a lab."""
+        try:
+            response = self._client.get(
+                "/analytics/completion-rate", params={"lab": lab}
+            )
+            response.raise_for_status()
+            return response.json()
+        except httpx.ConnectError as e:
+            raise ConnectionError(f"connection refused ({self.base_url})") from e
+        except httpx.HTTPStatusError as e:
+            raise HTTPError(f"HTTP {e.response.status_code}") from e
+        except httpx.HTTPError as e:
+            raise HTTPError(f"request failed: {e}") from e
+
+    def trigger_sync(self) -> Optional[dict[str, Any]]:
+        """Trigger a data sync from the autochecker."""
+        try:
+            response = self._client.post("/pipeline/sync")
+            response.raise_for_status()
+            return response.json()
+        except httpx.ConnectError as e:
+            raise ConnectionError(f"connection refused ({self.base_url})") from e
+        except httpx.HTTPStatusError as e:
+            raise HTTPError(f"HTTP {e.response.status_code}") from e
+        except httpx.HTTPError as e:
+            raise HTTPError(f"request failed: {e}") from e
 
     def close(self) -> None:
         """Close the HTTP client."""
