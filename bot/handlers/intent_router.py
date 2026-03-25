@@ -68,6 +68,7 @@ def route(user_message: str, debug: bool = False) -> str:
 
         if debug:
             print(f"[loop] Iteration {iteration}", file=sys.stderr)
+            print(f"[debug] Messages count: {len(messages)}", file=sys.stderr)
 
         # Call the LLM
         response = llm_client.chat(
@@ -79,25 +80,56 @@ def route(user_message: str, debug: bool = False) -> str:
         # Check if LLM wants to call tools
         tool_calls = response.get("tool_calls", [])
 
+        if debug and tool_calls:
+            print(
+                f"[debug] Tool call structure: {tool_calls[0].keys() if tool_calls else 'none'}",
+                file=sys.stderr,
+            )
+
         if not tool_calls:
             # No tool calls - LLM has the final answer
             if debug:
-                print(f"[response] {response.get('content', '')[:100]}...", file=sys.stderr)
+                print(
+                    f"[response] {response.get('content', '')[:100]}...",
+                    file=sys.stderr,
+                )
             return response.get("content", "I couldn't process that request.")
 
-        # Execute tool calls
+        # Execute tool calls and track them properly
         if debug:
             print(f"[tool] LLM called {len(tool_calls)} tool(s)", file=sys.stderr)
 
-        tool_results = []
+        import json
+
+        # Add the assistant message with tool calls
+        assistant_tool_calls = []
         for tool_call in tool_calls:
-            # Extract tool info from the call
+            function = tool_call.get("function", {})
+            assistant_tool_calls.append(
+                {
+                    "id": tool_call.get("id", function.get("name", "")),
+                    "type": "function",
+                    "function": {
+                        "name": function.get("name", ""),
+                        "arguments": function.get("arguments", "{}"),
+                    },
+                }
+            )
+
+        messages.append(
+            {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": assistant_tool_calls,
+            }
+        )
+
+        # Execute each tool and add its result
+        for i, tool_call in enumerate(tool_calls):
             function = tool_call.get("function", {})
             tool_name = function.get("name", "")
+            tool_call_id = tool_call.get("id", tool_name)
             arguments_str = function.get("arguments", "{}")
-
-            # Parse arguments (LLM returns JSON string)
-            import json
 
             try:
                 arguments = json.loads(arguments_str)
@@ -107,43 +139,28 @@ def route(user_message: str, debug: bool = False) -> str:
             if debug:
                 print(f"[tool] Calling {tool_name}({arguments})", file=sys.stderr)
 
-            # Execute the tool
             try:
                 result = execute_tool(tool_name, arguments, api_client)
                 if debug:
-                    result_str = str(result)[:100] + "..." if len(str(result)) > 100 else str(result)
+                    result_str = (
+                        str(result)[:100] + "..."
+                        if len(str(result)) > 100
+                        else str(result)
+                    )
                     print(f"[tool] Result: {result_str}", file=sys.stderr)
             except Exception as e:
                 result = {"error": str(e)}
                 if debug:
                     print(f"[tool] Error: {e}", file=sys.stderr)
 
-            tool_results.append({
-                "tool_name": tool_name,
-                "result": result,
-            })
-
-        # Feed tool results back to the LLM
-        if debug:
-            print(f"[summary] Feeding {len(tool_results)} tool result(s) back to LLM", file=sys.stderr)
-
-        # Add tool results as assistant/tool messages
-        for tool_result in tool_results:
-            messages.append({
-                "role": "assistant",
-                "content": "",
-                "tool_calls": [{
-                    "function": {
-                        "name": tool_result["tool_name"],
-                        "arguments": "{}",  # Simplified - real implementation would track original args
-                    }
-                }]
-            })
-            messages.append({
-                "role": "tool",
-                "content": json.dumps(tool_result["result"], default=str),
-                "tool_call_id": tool_result["tool_name"],
-            })
+            # Add tool result message
+            messages.append(
+                {
+                    "role": "tool",
+                    "content": json.dumps(result, default=str),
+                    "tool_call_id": tool_call_id,
+                }
+            )
 
     # Max iterations reached
     return "I'm having trouble processing this request. Please try rephrasing your question."
