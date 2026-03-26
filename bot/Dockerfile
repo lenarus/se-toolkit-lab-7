@@ -5,8 +5,8 @@ WORKDIR /app
 # Install uv
 RUN pip install uv==0.6.15
 
-# Copy pyproject.toml and uv.lock for dependency installation
-COPY pyproject.toml uv.lock ./
+# Copy pyproject.toml from bot directory and uv.lock from root
+COPY pyproject.toml ../uv.lock ./
 
 # Install dependencies using uv
 RUN uv sync --frozen
