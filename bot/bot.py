@@ -21,7 +21,7 @@ import logging
 import sys
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import CommandStart
+from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 
 from config import get_bot_token, setup_config
