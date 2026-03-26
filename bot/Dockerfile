@@ -2,11 +2,11 @@ FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
 
 WORKDIR /app
 
-# Copy the entire bot directory including .venv (built on host)
-COPY bot/ .
+# Copy the .venv from project root
+COPY .venv /app/.venv
 
-# Set UV_PROJECT_ENVIRONMENT to use the copied .venv
-ENV UV_PROJECT_ENVIRONMENT=/app/.venv
+# Copy the bot code
+COPY bot/ /app/
 
-# Run the bot directly from the copied .venv
+# Run the bot
 CMD ["/app/.venv/bin/python", "bot.py"]
