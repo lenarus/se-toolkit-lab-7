@@ -60,6 +60,7 @@ def main() -> None:
         run_bot()
 
 
+# fix merge
 def run_test(query: str) -> None:
     """
     Execute a handler directly and print the result.
