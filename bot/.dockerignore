@@ -1,0 +1,7 @@
+# Don't ignore .venv - we need it for the Docker build
+# .venv/
+
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
